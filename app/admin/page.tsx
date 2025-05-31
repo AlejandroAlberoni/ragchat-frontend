@@ -13,17 +13,19 @@ import {
 import api from "@/lib/api";
 import { roboto, roboto_condensed } from "@/lib/fonts";
 import { Curriculum } from "@/lib/schemas";
-import { Trash2 } from "lucide-react";
+import { LoaderCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import useSWR from "swr";
 import CurriculumCard from "./curriculumcard";
 import Upload from "./upload";
+import { useProcessingId } from "@/hooks/processing_curriculum";
 
 const Page = () => {
   const myCVS = (url: string) => api.get(url).then((res) => res.data.data);
   const { data: cvs, mutate }: { data: Curriculum[]; mutate: () => void } =
     useSWR(`${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`, myCVS);
 
+  const processingId = useProcessingId((state) => state.processingId)
   const handleDelete = async (id: string) => {
     try {
       await api.delete(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete/${id}`);
@@ -40,12 +42,23 @@ const Page = () => {
         <Upload />
       </div>
       {Array.isArray(cvs) && cvs.length > 0 ? (
-        <div className="md:mx-80 md:gap-6 gap-10 grid md:grid-cols-3">
+        <div className="md:mx-80 md:gap-6 gap-10 grid md:grid-cols-3 relative">
+          {processingId && (
+            <div className="absolute inset-0 z-20 bg-white/30 backdrop-blur-md rounded-xl pointer-events-none" />
+          )}
           {cvs.map((value: Curriculum) => (
             <div
               key={value._id}
               className="relative p-4 bg-zinc-300 rounded-xl flex flex-col"
             >
+              {value._id === processingId && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-xl">
+                  <div className="bg-white/70 backdrop-blur-md rounded-xl p-4 flex flex-col items-center shadow-lg border border-white/30">
+                    <p className={`${roboto.className}`}>Processando</p>
+                    <LoaderCircle className="animate-spin h-8 w-8 text-emerald-600" />
+                  </div>
+                </div>
+              )}
               {value?.active && (
                 <div className="absolute top-2 right-2 border-2 px-[3px] rounded-sm border-emerald-300 text-emerald-500">
                   Ativo

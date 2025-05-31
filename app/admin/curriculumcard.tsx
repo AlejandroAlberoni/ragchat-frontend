@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useProcessingId } from "@/hooks/processing_curriculum";
 import api from "@/lib/api";
 import { Curriculum, EditDto } from "@/lib/schemas";
 import { DialogClose, DialogTrigger } from "@radix-ui/react-dialog";
@@ -45,8 +46,10 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
   const isNameChanged = edit.name !== (value.name || "");
   const isTextChanged = edit.text !== (value.text || "");
 
+  const { setProcessingId } = useProcessingId();
 
   const handleActivateCV = async () => {
+    setProcessingId(value._id)
     try {
       const response = await activateCV(value._id);
       toast(`O curriculo ${value._id} foi ativado.`);
@@ -62,6 +65,9 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
       );
     } catch (err) {
       toast(`Erro ao ativar o curriculo ${err}`);
+    }
+    finally {
+      setProcessingId(null)
     }
   };
 
