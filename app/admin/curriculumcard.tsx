@@ -1,0 +1,214 @@
+import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Curriculum, EditDto } from "@/lib/schemas";
+import { LoaderCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { DialogClose, DialogTrigger } from "@radix-ui/react-dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import api from "@/lib/api";
+import { toast } from "sonner";
+import { mutate } from "swr";
+
+const processAIText = async (id: string) => {
+  const data = await api.post(
+    `${process.env.NEXT_PUBLIC_API_URL}/admin/gemini/${id}`
+  );
+  return data;
+};
+
+const activateCV = async (id: string) => {
+  const data = await api.put(
+    `${process.env.NEXT_PUBLIC_API_URL}/admin/activate-cv/${id}`
+  );
+  return data;
+};
+
+const saveEditCV = async (editDto: EditDto) => {
+  const data = api.post(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit`, editDto);
+  return data;
+};
+
+const deleteCV = async (id: string) => {
+
+}
+
+const CurriculumCard = function ({ value }: { value: Curriculum }) {
+  const [edit, setEdit] = useState<EditDto>({
+    parentId: value._id,
+    name: value.name,
+    text: value.text,
+    processed: value.processed,
+  });
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const isNameChanged = edit.name !== value.name;
+  const isTextChanged = edit.text !== value.text;
+
+  const handleProcessAI = async () => {
+    setLoadingAI(true);
+    try {
+      let data = await processAIText(value._id);
+      setEdit((prev) => ({ ...prev, processed: data.data.processed }));
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
+  const handleActivateCV = async () => {
+    try {
+      let response = await activateCV(value._id);
+      toast(`O curriculo ${value._id} foi ativado.`);
+      mutate(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
+        (docs: Curriculum[] = []) =>
+          docs.map((doc) =>
+            doc._id === response.data.data._id
+              ? response.data.data
+              : { ...doc, active: false }
+          ),
+        false
+      );
+    } catch (err) {
+      toast(`Erro ao ativar o curriculo ${err}`);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    setIsSaving(true);
+    try {
+      let response = await saveEditCV(edit);
+      toast(`O curriculo ${value._id} foi salvo com sucesso.`);
+      mutate(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
+        (docs: Curriculum[] = []) =>
+          docs.map(
+            (doc) =>
+              doc._id === response.data.data._id
+                ? response.data.data
+                : doc
+          ),
+        false
+      );
+    } catch (err) {
+      toast(`Erro ao salvar. Erro: ${err}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+    const handleDelete = async () => {
+    try {
+      let response = await deleteCV(value._id);
+      toast(`O curriculo ${value._id} foi deletado.`);
+      mutate(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
+        (docs: Curriculum[] = []) =>
+          {
+
+            return docs
+          },
+        false
+      );
+    } catch (err) {
+      toast(`Erro ao deletar o curriculo. Erro: ${err}`);
+    }
+  };
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant={"outline"}>Ver mais</Button>
+      </DialogTrigger>
+      <DialogContent aria-describedby="Edição de componentes de currículo">
+        <DialogHeader>
+          <DialogClose asChild>
+            <Button
+              className="my-2 bg-emerald-500 hover:bg-emerald-600"
+              onClick={handleActivateCV}
+              disabled={true}
+            >
+              Usar este currículo
+            </Button>
+          </DialogClose>
+          <DialogTitle className="flex flex-col gap-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input
+              id="name"
+              defaultValue={value.name}
+              onChange={(e) => setEdit({ ...edit, name: e.target.value })}
+              className={`${isNameChanged ? "border-emerald-300" : ""}`}
+            />
+            <span className="italic text-sm text-stone-400 font-extralight">
+              {new Date(value.created_at).toUTCString()}
+            </span>
+          </DialogTitle>
+        </DialogHeader>
+        <div>
+          <Label htmlFor="text">Text</Label>
+          <Textarea
+            id="text"
+            defaultValue={value.text}
+            placeholder="Edite ou crie seu currículo aqui."
+            onChange={(e) => setEdit({ ...edit, text: e.target.value })}
+            className={`h-40 ${isTextChanged ? "border-emerald-300" : ""}`}
+            disabled={loadingAI}
+          />
+        </div>
+        <Button
+          className="my-10"
+          onClick={handleProcessAI}
+          disabled={loadingAI}
+        >
+          {loadingAI ? (
+            <>
+              Processando...
+              <LoaderCircle className="animate-spin h-4 w-4 mr-2" />
+            </>
+          ) : (
+            "Processar texto com IA"
+          )}
+        </Button>
+        <div>
+          <Label htmlFor="text"></Label>
+          <Textarea
+            id="processed"
+            defaultValue={value.processed}
+            title="Texto gerado com IA, edite o quanto quiser."
+            onChange={(e) => setEdit({ ...edit, processed: e.target.value })}
+            disabled={loadingAI}
+          />
+        </div>
+        <DialogFooter>
+          <DialogClose>Cancelar</DialogClose>
+          <Button
+            className="flex"
+            variant={"ghost"}
+            disabled={(!isNameChanged && !isTextChanged) || isSaving}
+            onClick={handleSaveEdit}
+          >
+            {isSaving ? (
+              <>
+                Salvando...
+                <LoaderCircle className="animate-spin h-4 w-4 mr-2" />
+              </>
+            ) : (
+              "Salvar"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default CurriculumCard;
