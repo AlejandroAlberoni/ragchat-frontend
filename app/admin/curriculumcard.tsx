@@ -1,8 +1,4 @@
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Curriculum, EditDto } from "@/lib/schemas";
-import { LoaderCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +6,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DialogClose, DialogTrigger } from "@radix-ui/react-dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import api from "@/lib/api";
+import { Curriculum, EditDto } from "@/lib/schemas";
+import { DialogClose, DialogTrigger } from "@radix-ui/react-dialog";
+import { LoaderCircle } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { mutate } from "swr";
 
@@ -33,8 +33,6 @@ const saveEditCV = async (editDto: EditDto) => {
   return data;
 };
 
-const deleteCV = async (id: string) => {};
-
 const CurriculumCard = function ({ value }: { value: Curriculum }) {
   const [edit, setEdit] = useState<EditDto>({
     parentId: value._id,
@@ -51,7 +49,7 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
 
   const handleActivateCV = async () => {
     try {
-      let response = await activateCV(value._id);
+      const response = await activateCV(value._id);
       toast(`O curriculo ${value._id} foi ativado.`);
       mutate(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
@@ -71,7 +69,7 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
   const handleSaveEdit = async () => {
     setIsSaving(true);
     try {
-      let response = await saveEditCV(edit);
+      const response = await saveEditCV(edit);
       toast(`O curriculo ${value._id} foi salvo com sucesso.`);
       mutate(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
@@ -88,21 +86,6 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      let response = await deleteCV(value._id);
-      toast(`O curriculo ${value._id} foi deletado.`);
-      mutate(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
-        (docs: Curriculum[] = []) => {
-          return docs;
-        },
-        false
-      );
-    } catch (err) {
-      toast(`Erro ao deletar o curriculo. Erro: ${err}`);
-    }
-  };
   return (
     <Dialog>
       <DialogTrigger asChild>

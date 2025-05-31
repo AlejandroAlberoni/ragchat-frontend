@@ -1,4 +1,4 @@
-import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
+import { ArrowBigRight } from "lucide-react";
 import React from "react";
 
 export default function AdminLayout({

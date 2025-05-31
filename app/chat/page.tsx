@@ -54,7 +54,7 @@ const Chat = () => {
         ...prev,
         { text: responseText, time: timeAdmin, sender: 'admin' }
       ])
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, { text: 'Erro ao obter resposta do admin.', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), sender: 'admin' }])
     } finally {
       setLoading(false)

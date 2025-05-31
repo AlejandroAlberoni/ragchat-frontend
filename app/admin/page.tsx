@@ -1,13 +1,4 @@
 "use client";
-import api from "@/lib/api";
-import { Curriculum } from "@/lib/schemas";
-import { CirclePlus } from "lucide-react";
-import { Trash2 } from "lucide-react";
-import useSWR from "swr";
-import CurriculumCard from "./curriculumcard";
-import { useEffect, useState } from "react";
-import Upload from "./upload";
-import { roboto, roboto_condensed } from "@/lib/fonts";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,15 +10,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import api from "@/lib/api";
+import { roboto, roboto_condensed } from "@/lib/fonts";
+import { Curriculum } from "@/lib/schemas";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import useSWR from "swr";
+import CurriculumCard from "./curriculumcard";
+import Upload from "./upload";
 
 const Page = () => {
   const myCVS = (url: string) => api.get(url).then((res) => res.data.data);
   const {
     data: cvs,
-    isLoading: isLoadingCVS,
     mutate,
-  }: { data: Curriculum[]; isLoading: boolean; mutate: Function } = useSWR(
+  }: { data: Curriculum[]; mutate: Function } = useSWR(
     `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
     myCVS
   );

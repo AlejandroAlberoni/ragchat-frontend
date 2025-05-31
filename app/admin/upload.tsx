@@ -11,7 +11,7 @@ const Upload = () => {
   const [uploading, setUploading] = useState(false);
 
   const onDrop = useCallback(
-    async (acceptedFiles: File[], fileRejections: any) => {
+    async (acceptedFiles: File[]) => {
       setError(null);
 
       if (acceptedFiles.length !== 1) {
@@ -50,9 +50,8 @@ const Upload = () => {
             false
           );
         }
-      } catch (err: any) {
+      } catch {
         setError(
-          err.response?.data?.error ||
             "Erro ao enviar o arquivo. Tente novamente."
         );
       } finally {
