@@ -40,7 +40,6 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
     text: value.text || "",
     processed: value.processed || "",
   });
-  const [loadingAI, setLoadingAI] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const isNameChanged = edit.name !== (value.name || "");
@@ -128,7 +127,6 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
               setEdit((prevEdit) => ({ ...prevEdit, text: newValue }));
             }}
             className={`h-40 ${isTextChanged ? "border-emerald-300" : ""}`}
-            disabled={loadingAI}
           />
         </div>
 

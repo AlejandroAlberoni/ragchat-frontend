@@ -4,7 +4,7 @@ import api from "@/lib/api";
 
 const COOLDOWN_KEY = "login_email_cooldown";
 
-const page = () => {
+const Page = () => {
   const [cooldown, setCooldown] = useState<number>(0);
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
@@ -26,7 +26,7 @@ const page = () => {
 
   const handleSendLink = async () => {
     try {
-      let res = await api.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/request-token`);
+      const res = await api.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/request-token`);
       if (res.status == 429){
         setMessage("Já foi enviado um link pelo tempo determinado.")
         setError(true)
@@ -67,4 +67,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

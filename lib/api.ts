@@ -1,8 +1,8 @@
 import axios from 'axios';
-const Cookies = require('js-cookie');
+import Cookies from 'js-cookie'
 
 const api = axios.create({
-    baseURL: process.env.API_URL,
+    baseURL: process.env.PUBLIC_NEXT_API_URL,
     timeout: 10000,
 })
 
