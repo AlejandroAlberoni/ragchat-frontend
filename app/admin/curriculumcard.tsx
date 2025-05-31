@@ -17,12 +17,6 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import { mutate } from "swr";
 
-const processAIText = async (id: string) => {
-  const data = await api.post(
-    `${process.env.NEXT_PUBLIC_API_URL}/admin/gemini/${id}`
-  );
-  return data;
-};
 
 const activateCV = async (id: string) => {
   const data = await api.put(
@@ -32,38 +26,28 @@ const activateCV = async (id: string) => {
 };
 
 const saveEditCV = async (editDto: EditDto) => {
-  const data = api.post(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit`, editDto);
+  const data = api.post(
+    `${process.env.NEXT_PUBLIC_API_URL}/admin/edit`,
+    editDto
+  );
   return data;
 };
 
-const deleteCV = async (id: string) => {
-
-}
+const deleteCV = async (id: string) => {};
 
 const CurriculumCard = function ({ value }: { value: Curriculum }) {
   const [edit, setEdit] = useState<EditDto>({
     parentId: value._id,
-    name: value.name,
-    text: value.text,
-    processed: value.processed,
+    name: value.name || "",
+    text: value.text || "",
+    processed: value.processed || "",
   });
   const [loadingAI, setLoadingAI] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const isNameChanged = edit.name !== value.name;
-  const isTextChanged = edit.text !== value.text;
+  const isNameChanged = edit.name !== (value.name || "");
+  const isTextChanged = edit.text !== (value.text || "");
 
-  const handleProcessAI = async () => {
-    setLoadingAI(true);
-    try {
-      let data = await processAIText(value._id);
-      setEdit((prev) => ({ ...prev, processed: data.data.processed }));
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoadingAI(false);
-    }
-  };
 
   const handleActivateCV = async () => {
     try {
@@ -92,11 +76,8 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
       mutate(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
         (docs: Curriculum[] = []) =>
-          docs.map(
-            (doc) =>
-              doc._id === response.data.data._id
-                ? response.data.data
-                : doc
+          docs.map((doc) =>
+            doc._id === response.data.data._id ? response.data.data : doc
           ),
         false
       );
@@ -107,17 +88,15 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
     }
   };
 
-    const handleDelete = async () => {
+  const handleDelete = async () => {
     try {
       let response = await deleteCV(value._id);
       toast(`O curriculo ${value._id} foi deletado.`);
       mutate(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/my-curriculums`,
-        (docs: Curriculum[] = []) =>
-          {
-
-            return docs
-          },
+        (docs: Curriculum[] = []) => {
+          return docs;
+        },
         false
       );
     } catch (err) {
@@ -135,7 +114,6 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
             <Button
               className="my-2 bg-emerald-500 hover:bg-emerald-600"
               onClick={handleActivateCV}
-              disabled={true}
             >
               Usar este currículo
             </Button>
@@ -144,8 +122,11 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
             <Label htmlFor="name">Nome</Label>
             <Input
               id="name"
-              defaultValue={value.name}
-              onChange={(e) => setEdit({ ...edit, name: e.target.value })}
+              value={edit.name || ""}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                setEdit((prevEdit) => ({ ...prevEdit, name: newValue }));
+              }}
               className={`${isNameChanged ? "border-emerald-300" : ""}`}
             />
             <span className="italic text-sm text-stone-400 font-extralight">
@@ -157,35 +138,25 @@ const CurriculumCard = function ({ value }: { value: Curriculum }) {
           <Label htmlFor="text">Text</Label>
           <Textarea
             id="text"
-            defaultValue={value.text}
+            value={edit.text || ""}
             placeholder="Edite ou crie seu currículo aqui."
-            onChange={(e) => setEdit({ ...edit, text: e.target.value })}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setEdit((prevEdit) => ({ ...prevEdit, text: newValue }));
+            }}
             className={`h-40 ${isTextChanged ? "border-emerald-300" : ""}`}
             disabled={loadingAI}
           />
         </div>
-        <Button
-          className="my-10"
-          onClick={handleProcessAI}
-          disabled={loadingAI}
-        >
-          {loadingAI ? (
-            <>
-              Processando...
-              <LoaderCircle className="animate-spin h-4 w-4 mr-2" />
-            </>
-          ) : (
-            "Processar texto com IA"
-          )}
-        </Button>
+
         <div>
           <Label htmlFor="text"></Label>
           <Textarea
             id="processed"
-            defaultValue={value.processed}
-            title="Texto gerado com IA, edite o quanto quiser."
-            onChange={(e) => setEdit({ ...edit, processed: e.target.value })}
-            disabled={loadingAI}
+            value={edit.processed || ""}
+            title="Texto gerado com IA."
+            disabled={true}
+            readOnly
           />
         </div>
         <DialogFooter>
