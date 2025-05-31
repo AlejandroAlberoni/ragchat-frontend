@@ -15,8 +15,11 @@ function Page() {
   useEffect(() => {
     const token = searchParams.get('token');
     if (token && isJWT(token)) {
-      Cookies.setItem('access_token', token);
+      Cookies.set('access_token', token);
       router.push('/admin')
+    }
+    if (Cookies.get('access_token')){
+      return router.push('/admin')
     }
     setTimeout(function () {
       router.replace('/auth/login')
@@ -24,7 +27,7 @@ function Page() {
   }, [searchParams]);
 
   return (
-    <div className='w-full h-[100vh] text-center items-center font-serif text-xl'>Olá, esta pagina é a página de autenticação, por favor autentique-se. Redirecionando automaticamente...</div>
+    <div className='w-full h-[100vh] text-center items-center text-xl font-sans my-6'>Olá, esta pagina é a página de autenticação, por favor autentique-se. Redirecionando automaticamente...</div>
   )
 }
 

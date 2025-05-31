@@ -26,7 +26,7 @@ const page = () => {
 
   const handleSendLink = async () => {
     try {
-      let res = await api.get(`${process.env.API_URL}/request-token`);
+      let res = await api.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/request-token`);
       if (res.status == 429){
         setMessage("Já foi enviado um link pelo tempo determinado.")
         setError(true)
