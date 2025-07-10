@@ -1,21 +1,28 @@
-This is a Next.js project deployed in vercel.
+# RAGCHAT Frontend
+Este é um front-end para uma aplicação web, ele foi hospedado na vercel.
 
-It is a chat with my curriculum, using semantic search. You can just chat with it at /chat.
+É um chat com meu currículo, usando similaridade de cosseno como métrica para a **busca semântica**.
 
-# Para rodar o projeto localmente:
+## Para rodar o projeto localmente:
 
 1. **Clone o repositório:**
-   ```bash```
+   ```
    git clone https://github.com/AlejandroAlberoni/ragchat-frontend.git
+   ```
+   navegue para o diretório:
+   ```
    cd ragchat-frontend
+   ```
 
-2. npm install
-   # ou
-   yarn install
+2. Instale as dependências:
 
-3. Configure NEXT_PUBLIC_API_URL (É A URL DO BACKEND)
+   **npm install**
+   ou
+   **yarn install**
+
+3. Configure num arquivo **.env** a variável NEXT_PUBLIC_API_URL (Sob solicitação)
 
 4. Rode com:
-# npm run dev
-# ou
-# yarn dev
+ **npm run dev**
+  ou
+ **yarn dev**
